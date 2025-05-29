@@ -1,0 +1,273 @@
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 24px 40px;
+    background: #e8f0fe;
+    color: #1a237e;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 700;
+    color: #283593;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 2.5rem;
+    user-select: none;
+  }
+
+  .section {
+    background: white;
+    padding: 28px 32px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    box-shadow: 0 12px 20px rgba(40, 53, 147, 0.12);
+    transition: box-shadow 0.3s ease;
+  }
+  .section:hover {
+    box-shadow: 0 16px 28px rgba(40, 53, 147, 0.18);
+  }
+
+  h2, h3 {
+    color: #3949ab;
+    margin-bottom: 20px;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  input, select, button {
+    font-size: 1.1rem;
+    padding: 12px 14px;
+    margin: 10px 0 20px 0;
+    width: 100%;
+    border-radius: 8px;
+    border: 1.8px solid #c5cae9;
+    transition: border-color 0.25s ease;
+    font-weight: 500;
+    color: #283593;
+    outline-offset: 2px;
+    outline-color: transparent;
+    user-select: text;
+  }
+
+  input:focus, select:focus {
+    border-color: #3949ab;
+    outline-color: #3949ab;
+    box-shadow: 0 0 6px rgba(57, 73, 171, 0.4);
+  }
+
+  button {
+    background: #3949ab;
+    color: white;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: #283593;
+    box-shadow: 0 4px 12px rgba(40, 53, 147, 0.4);
+  }
+  button:active {
+    background: #1a237e;
+    box-shadow: none;
+  }
+
+  .delete-button {
+    background: #e53935;
+    margin-left: 14px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    vertical-align: middle;
+  }
+  .delete-button:hover {
+    background: #b71c1c;
+  }
+  .delete-button:active {
+    background: #7f0000;
+  }
+
+  .reset-button {
+    background: #d84315;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    width: auto;
+    user-select: none;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(216, 67, 21, 0.4);
+  }
+  .reset-button:hover {
+    background: #bf360c;
+    box-shadow: 0 6px 14px rgba(191, 54, 12, 0.6);
+  }
+  .reset-button:active {
+    background: #8e2400;
+    box-shadow: none;
+  }
+
+  #roommate-error, #contribution-error {
+    color: #d32f2f;
+    font-weight: 600;
+    min-height: 20px;
+    user-select: none;
+  }
+
+  p strong {
+    font-weight: 700;
+    user-select: text;
+  }
+
+  .positive {
+    color: #388e3c;
+    font-weight: 600;
+    user-select: text;
+  }
+
+  .negative {
+    color: #d32f2f;
+    font-weight: 600;
+    user-select: text;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(57, 73, 171, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  th, td {
+    padding: 14px 18px;
+    text-align: center;
+    border-bottom: 1px solid #e3e9f7;
+  }
+  th {
+    background-color: #3949ab;
+    color: white;
+    font-weight: 600;
+    user-select: none;
+  }
+  tr:hover:not(:first-child) {
+    background-color: #f1f4ff;
+  }
+
+  ul {
+    padding-left: 20px;
+    user-select: none;
+  }
+
+  ul li {
+    margin: 6px 0;
+    font-weight: 600;
+    color: #3949ab;
+  }
+
+  .present-toggle {
+    margin-left: 10px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+  }
+
+  .summary-record {
+    border: 2px solid #3949ab;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f0f4ff;
+  }
+  .summary-record h3 {
+    margin-top: 0;
+    user-select: none;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    body {
+      padding: 0 12px 30px;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    input, select, button {
+      font-size: 1rem;
+    }
+    table, th, td {
+      font-size: 0.85rem;
+    }
+  }
+
+
+
+
+
+
+  @media (max-width: 600px) {
+  body {
+    padding: 0 12px 30px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  input, select, button {
+    font-size: 1rem;
+    width: 100%;
+  }
+
+  table, th, td {
+    font-size: 0.85rem;
+    padding: 10px 8px;
+  }
+
+  .section {
+    padding: 20px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .reset-button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .delete-button {
+    margin-top: 10px;
+    width: 100%;
+    display: block;
+  }
+
+  /* Add horizontal scroll for tables */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .summary-record ul li {
+    font-size: 0.9rem;
+  }
+}
+
+
