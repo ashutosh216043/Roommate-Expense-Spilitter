@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Roommate Expense Splitter with Presence Snapshots</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 24px 40px;
+    background: #e8f0fe;
+    color: #1a237e;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 700;
+    color: #283593;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 2.5rem;
+    user-select: none;
+  }
+
+  .section {
+    background: white;
+    padding: 28px 32px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    box-shadow: 0 12px 20px rgba(40, 53, 147, 0.12);
+    transition: box-shadow 0.3s ease;
+  }
+  .section:hover {
+    box-shadow: 0 16px 28px rgba(40, 53, 147, 0.18);
+  }
+
+  h2, h3 {
+    color: #3949ab;
+    margin-bottom: 20px;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  input, select, button {
+    font-size: 1.1rem;
+    padding: 12px 14px;
+    margin: 10px 0 20px 0;
+    width: 100%;
+    border-radius: 8px;
+    border: 1.8px solid #c5cae9;
+    transition: border-color 0.25s ease;
+    font-weight: 500;
+    color: #283593;
+    outline-offset: 2px;
+    outline-color: transparent;
+    user-select: text;
+  }
+
+  input:focus, select:focus {
+    border-color: #3949ab;
+    outline-color: #3949ab;
+    box-shadow: 0 0 6px rgba(57, 73, 171, 0.4);
+  }
+
+  button {
+    background: #3949ab;
+    color: white;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: #283593;
+    box-shadow: 0 4px 12px rgba(40, 53, 147, 0.4);
+  }
+  button:active {
+    background: #1a237e;
+    box-shadow: none;
+  }
+
+  .delete-button {
+    background: #e53935;
+    margin-left: 14px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    vertical-align: middle;
+  }
+  .delete-button:hover {
+    background: #b71c1c;
+  }
+  .delete-button:active {
+    background: #7f0000;
+  }
+
+  .reset-button {
+    background: #d84315;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    width: auto;
+    user-select: none;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(216, 67, 21, 0.4);
+  }
+  .reset-button:hover {
+    background: #bf360c;
+    box-shadow: 0 6px 14px rgba(191, 54, 12, 0.6);
+  }
+  .reset-button:active {
+    background: #8e2400;
+    box-shadow: none;
+  }
+
+  #roommate-error, #contribution-error {
+    color: #d32f2f;
+    font-weight: 600;
+    min-height: 20px;
+    user-select: none;
+  }
+
+  p strong {
+    font-weight: 700;
+    user-select: text;
+  }
+
+  .positive {
+    color: #388e3c;
+    font-weight: 600;
+    user-select: text;
+  }
+
+  .negative {
+    color: #d32f2f;
+    font-weight: 600;
+    user-select: text;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(57, 73, 171, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  th, td {
+    padding: 14px 18px;
+    text-align: center;
+    border-bottom: 1px solid #e3e9f7;
+  }
+  th {
+    background-color: #3949ab;
+    color: white;
+    font-weight: 600;
+    user-select: none;
+  }
+  tr:hover:not(:first-child) {
+    background-color: #f1f4ff;
+  }
+
+  ul {
+    padding-left: 20px;
+    user-select: none;
+  }
+
+  ul li {
+    margin: 6px 0;
+    font-weight: 600;
+    color: #3949ab;
+  }
+
+  .present-toggle {
+    margin-left: 10px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+  }
+
+  .summary-record {
+    border: 2px solid #3949ab;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f0f4ff;
+  }
+  .summary-record h3 {
+    margin-top: 0;
+    user-select: none;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    body {
+      padding: 0 12px 30px;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    input, select, button {
+      font-size: 1rem;
+    }
+    table, th, td {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Roommate Expense Splitter</h1>
+
+<div class="section" style="position: relative;">
+  <h2>Add Roommate</h2>
+  <input type="text" id="roommate-name" placeholder="Roommate Name" autocomplete="off" />
+  <button onclick="addRoommate()">Add Roommate</button>
+  <button class="reset-button" onclick="resetAllData()">Reset All Data</button>
+  <p id="roommate-error"></p>
+</div>
+
+<div class="section" id="presence-section" style="display:none;">
+  <h2>Roommates Presence</h2>
+  <div id="presence-list" style="user-select:none;"></div>
+</div>
+
+<div class="section" id="add-contribution-section" style="display:none;">
+  <h2>Add Contribution</h2>
+  <select id="roommate-select" aria-label="Select roommate"></select>
+  <input type="number" id="contribution-amount" placeholder="Amount Contributed" min="0" step="0.01" autocomplete="off" />
+  <input type="text" id="contribution-description" placeholder="Description (optional)" autocomplete="off" />
+  <button onclick="addContribution()">Add Contribution</button>
+  <p id="contribution-error"></p>
+</div>
+
+<div class="section" id="records-section" style="display:none;">
+  <h2>Summary Records (Snapshots)</h2>
+  <div id="records-container"></div>
+</div>
+
+<script>
+  let roommates = {}; // name -> { total, contributions[] }
+  let presenceSnapshots = []; 
+  /*
+    Each snapshot: {
+      timestamp,
+      presentRoommates: [names],
+      contributions: [ { roommate, amount, description, timestamp } ]
+    }
+  */
+  
+  // Load from localStorage
+  function loadFromStorage() {
+    const rm = localStorage.getItem('roommates');
+    const ps = localStorage.getItem('presenceSnapshots');
+    roommates = rm ? JSON.parse(rm) : {};
+    presenceSnapshots = ps ? JSON.parse(ps) : [];
+    // Make sure roommates have present flag (default true)
+    for (const name in roommates) {
+      if (typeof roommates[name].present !== 'boolean') {
+        roommates[name].present = true;
+      }
+    }
+    if(presenceSnapshots.length === 0 && Object.keys(roommates).length > 0) {
+      // Create initial snapshot
+      createPresenceSnapshot();
+    }
+  }
+
+  function saveToStorage() {
+    localStorage.setItem('roommates', JSON.stringify(roommates));
+    localStorage.setItem('presenceSnapshots', JSON.stringify(presenceSnapshots));
+  }
+
+  // Add roommate
+  function addRoommate() {
+    const name = document.getElementById('roommate-name').value.trim();
+    const error = document.getElementById('roommate-error');
+    if (!name) {
+      error.textContent = "Please enter a valid roommate name.";
+      return;
+    }
+    if (roommates[name]) {
+      error.textContent = "Roommate already exists.";
+      return;
+    }
+    roommates[name] = { total: 0, contributions: [], present: true };
+    error.textContent = '';
+    document.getElementById('roommate-name').value = '';
+    updatePresenceList();
+    updateRoommateSelect();
+    createPresenceSnapshot();
+    saveToStorage();
+    updateSummaryRecords();
+    showSections();
+  }
+
+  // Update presence list UI
+  function updatePresenceList() {
+    const container = document.getElementById('presence-list');
+    container.innerHTML = '';
+    if (Object.keys(roommates).length === 0) {
+      document.getElementById('presence-section').style.display = 'none';
+      return;
+    }
+    document.getElementById('presence-section').style.display = 'block';
+    for (const name in roommates) {
+      const label = document.createElement('label');
+      label.style.marginRight = '18px';
+      label.style.userSelect = 'none';
+      label.title = "Toggle presence to create a new summary snapshot";
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = roommates[name].present;
+      checkbox.onchange = () => togglePresence(name, checkbox.checked);
+
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(' ' + name));
+      container.appendChild(label);
+    }
+  }
+
+  // Toggle presence and create a snapshot
+  function togglePresence(name, isPresent) {
+    if (!roommates[name]) return;
+    roommates[name].present = isPresent;
+    createPresenceSnapshot();
+    updateRoommateSelect();
+    saveToStorage();
+    updateSummaryRecords();
+  }
+
+  // Create a new snapshot record of presence + contributions at this moment
+  function createPresenceSnapshot() {
+    const timestamp = new Date().toISOString();
+    const presentRoommates = Object.entries(roommates)
+      .filter(([n, r]) => r.present)
+      .map(([n]) => n);
+
+    // Filter contributions relevant to present roommates at this moment
+    // We'll accumulate all contributions added so far from roommates currently present, 
+    // but grouped into the new snapshot only future contributions will add here.
+
+    // For "historical" snapshot, just save empty contributions array for now.
+    // Contributions added after snapshot creation go into last snapshot only.
+
+    // Push new snapshot with empty contributions array to accumulate new contributions only
+    presenceSnapshots.push({
+      timestamp,
+      presentRoommates,
+      contributions: []
+    });
+
+    // Clean old snapshots with no present roommates (optional)
+    presenceSnapshots = presenceSnapshots.filter(snap => snap.presentRoommates.length > 0);
+  }
+
+  // Update roommate select dropdown for adding contribution (only present roommates)
+  function updateRoommateSelect() {
+    const select = document.getElementById('roommate-select');
+    select.innerHTML = '';
+    const presentNames = Object.entries(roommates)
+      .filter(([n, r]) => r.present)
+      .map(([n]) => n);
+
+    if (presentNames.length === 0) {
+      const opt = document.createElement('option');
+      opt.textContent = 'No roommates present';
+      opt.disabled = true;
+      select.appendChild(opt);
+      select.disabled = true;
+      return;
+    }
+    select.disabled = false;
+
+    const placeholderOpt = document.createElement('option');
+    placeholderOpt.value = '';
+    placeholderOpt.textContent = 'Select roommate';
+    placeholderOpt.disabled = true;
+    placeholderOpt.selected = true;
+    select.appendChild(placeholderOpt);
+
+    presentNames.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+  }
+
+  // Add contribution - goes to the latest snapshot only
+  function addContribution() {
+    const select = document.getElementById('roommate-select');
+    const amountInput = document.getElementById('contribution-amount');
+    const descInput = document.getElementById('contribution-description');
+    const error = document.getElementById('contribution-error');
+
+    const roommate = select.value;
+    const amount = parseFloat(amountInput.value);
+    const description = descInput.value.trim();
+
+    if (!roommate) {
+      error.textContent = "Please select a roommate.";
+      return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      error.textContent = "Please enter a valid positive amount.";
+      return;
+    }
+
+    error.textContent = '';
+
+    // Update total for roommate globally (so visible on presence toggling)
+    roommates[roommate].total += amount;
+    roommates[roommate].contributions.push({
+      amount,
+      description,
+      timestamp: new Date().toISOString()
+    });
+
+    // Add to latest snapshot contributions if roommate present in that snapshot
+    if (presenceSnapshots.length === 0) {
+      // No snapshots exist yet? Create one (edge case)
+      createPresenceSnapshot();
+    }
+    const latestSnapshot = presenceSnapshots[presenceSnapshots.length - 1];
+
+    // Only add contribution if roommate is present in latest snapshot
+    if (latestSnapshot.presentRoommates.includes(roommate)) {
+      latestSnapshot.contributions.push({
+        roommate,
+        amount,
+        description,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      alert(`Roommate ${roommate} is not marked present in current snapshot, contribution not added to summary.`);
+    }
+
+    amountInput.value = '';
+    descInput.value = '';
+    select.value = '';
+
+    saveToStorage();
+    updateSummaryRecords();
+  }
+
+  // Update summary section showing all snapshots with their own calculations
+// Update summary section showing all snapshots with their own calculations
+// Update summary section showing all snapshots with their own calculations
+function updateSummaryRecords() {
+  const container = document.getElementById('records-container');
+  container.innerHTML = '';
+
+  if (presenceSnapshots.length === 0) {
+    document.getElementById('records-section').style.display = 'none';
+    return;
+  }
+  document.getElementById('records-section').style.display = 'block';
+
+  presenceSnapshots.forEach((snapshot, index) => {
+    const div = document.createElement('div');
+    div.className = 'summary-record';
+
+    const date = new Date(snapshot.timestamp);
+    const dateStr = date.toLocaleString();
+
+    const heading = document.createElement('h3');
+    heading.textContent = `Summary Record #${index + 1} (Snapshot at ${dateStr})`;
+    div.appendChild(heading);
+
+    // Present roommates
+    const presentP = document.createElement('p');
+    presentP.innerHTML = `<strong>Present Roommates:</strong> ${snapshot.presentRoommates.join(', ') || '(none)'}`;
+    div.appendChild(presentP);
+
+    // Contributions Table
+    if (snapshot.contributions.length > 0) {
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      thead.innerHTML = `<tr>
+        <th>Roommate</th>
+        <th>Amount (₹)</th>
+        <th>Share per Roommate (₹)</th>
+        <th>Description</th>
+        <th>Timestamp</th>
+      </tr>`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      const numPresent = snapshot.presentRoommates.length;
+
+      snapshot.contributions.forEach(c => {
+        const tr = document.createElement('tr');
+        const share = numPresent > 0 ? (c.amount / numPresent) : 0;
+        tr.innerHTML = `
+          <td>${c.roommate}</td>
+          <td>₹${c.amount.toFixed(2)}</td>
+          <td>₹${share.toFixed(2)}</td>
+          <td>${c.description || '-'}</td>
+          <td>${new Date(c.timestamp).toLocaleTimeString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      div.appendChild(table);
+    } else {
+      const noContrib = document.createElement('p');
+      noContrib.textContent = 'No contributions in this snapshot.';
+      div.appendChild(noContrib);
+    }
+
+    // Totals and equal share
+    const totals = {};
+    snapshot.presentRoommates.forEach(name => totals[name] = 0);
+    snapshot.contributions.forEach(c => {
+      if (totals.hasOwnProperty(c.roommate)) {
+        totals[c.roommate] += c.amount;
+      }
+    });
+
+    const totalExpenses = Object.values(totals).reduce((a, b) => a + b, 0);
+    const presentCount = snapshot.presentRoommates.length;
+    const equalShare = presentCount > 0 ? totalExpenses / presentCount : 0;
+
+    const totalP = document.createElement('p');
+    totalP.innerHTML = `<strong>Total Expenses:</strong> ₹${totalExpenses.toFixed(2)}<br/><strong>Each Person's Share:</strong> ₹${equalShare.toFixed(2)}`;
+    div.appendChild(totalP);
+
+    // Calculate net balances = total paid - equal share
+    const netBalances = {};
+    snapshot.presentRoommates.forEach(name => {
+      netBalances[name] = (totals[name] || 0) - equalShare;
+    });
+
+    // Show net balances
+    const netDiv = document.createElement('div');
+    netDiv.style.marginTop = '16px';
+    netDiv.innerHTML = `<strong>Net Balances (Positive means owed money, Negative means owes):</strong><br>`;
+    const ul = document.createElement('ul');
+    snapshot.presentRoommates.forEach(name => {
+      const li = document.createElement('li');
+      li.textContent = `${name}: ₹${netBalances[name].toFixed(2)}`;
+      li.className = netBalances[name] >= 0 ? 'positive' : 'negative';
+      ul.appendChild(li);
+    });
+    netDiv.appendChild(ul);
+    div.appendChild(netDiv);
+
+    // Calculate who pays whom to settle debts
+    function settleDebts(balances) {
+      const creditors = [];
+      const debtors = [];
+
+      for (const person in balances) {
+        const bal = balances[person];
+        if (bal > 0) creditors.push({ person, amount: bal });
+        else if (bal < 0) debtors.push({ person, amount: -bal });
+      }
+
+      const payments = [];
+
+      let i = 0, j = 0;
+      while (i < debtors.length && j < creditors.length) {
+        const debtor = debtors[i];
+        const creditor = creditors[j];
+        const payAmount = Math.min(debtor.amount, creditor.amount);
+
+        payments.push({
+          from: debtor.person,
+          to: creditor.person,
+          amount: payAmount
+        });
+
+        debtor.amount -= payAmount;
+        creditor.amount -= payAmount;
+
+        if (debtor.amount === 0) i++;
+        if (creditor.amount === 0) j++;
+      }
+      return payments;
+    }
+
+    const payments = settleDebts(netBalances);
+
+    if (payments.length > 0) {
+      const paymentDiv = document.createElement('div');
+      paymentDiv.style.marginTop = '16px';
+      paymentDiv.innerHTML = `<strong>Payments to Settle:</strong>`;
+      const payUl = document.createElement('ul');
+      payments.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = `${p.from} pays ₹${p.amount.toFixed(2)} to ${p.to}`;
+        payUl.appendChild(li);
+      });
+      paymentDiv.appendChild(payUl);
+      div.appendChild(paymentDiv);
+    } else {
+      const noPayments = document.createElement('p');
+      noPayments.style.marginTop = '16px';
+      noPayments.textContent = 'All accounts are settled.';
+      div.appendChild(noPayments);
+    }
+
+    container.appendChild(div);
+  });
+}
+
+
+
+  // Show/hide sections based on data presence
+  function showSections() {
+    const hasRoommates = Object.keys(roommates).length > 0;
+    document.getElementById('add-contribution-section').style.display = hasRoommates ? 'block' : 'none';
+    document.getElementById('presence-section').style.display = hasRoommates ? 'block' : 'none';
+    document.getElementById('records-section').style.display = hasRoommates ? 'block' : 'none';
+  }
+
+  // Reset all data (roommates, presence snapshots, contributions)
+  function resetAllData() {
+    if (confirm('Are you sure you want to reset all data? This will delete all roommates and contributions permanently.')) {
+      roommates = {};
+      presenceSnapshots = [];
+      saveToStorage();
+      updatePresenceList();
+      updateRoommateSelect();
+      updateSummaryRecords();
+      showSections();
+      document.getElementById('roommate-name').value = '';
+      document.getElementById('roommate-error').textContent = '';
+      document.getElementById('contribution-amount').value = '';
+      document.getElementById('contribution-description').value = '';
+      document.getElementById('contribution-error').textContent = '';
+    }
+  }
+
+  // Initializess
+  (function init() {
+    loadFromStorage();
+    updatePresenceList();
+    updateRoommateSelect();
+    updateSummaryRecords();
+    showSections();
+  })();
+
+</script>
+
+</body>
+</html>
